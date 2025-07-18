@@ -10,12 +10,15 @@ pub const GRID_HEIGHT: usize = 128;
 
 fn window_conf() -> Conf {
     // Set the initial window properties
-    Conf {
+     let mut conf = Conf {
         window_title: "wave2d".to_string(),
         window_width: GRID_WIDTH as i32,
         window_height: GRID_HEIGHT as i32,
         ..Default::default()
-    }
+    };
+    // turn vsync off
+    conf.platform.swap_interval = Some(0);
+    conf
 }
 
 fn get_color(p: f32) -> Color {
@@ -42,21 +45,28 @@ fn get_color(p: f32) -> Color {
 #[macroquad::main(window_conf())]
 async fn main() {
     // Initialize a 2D f32 array for main value
-    let mut p_array = Array2::from_shape_fn((GRID_WIDTH, GRID_HEIGHT), |(i, j)| {
+    let mut value_array = Array2::from_shape_fn((GRID_WIDTH, GRID_HEIGHT), |(i, j)| {
         let x = i as f32;
         let y = j as f32;
         let width: f32 = GRID_WIDTH as f32;
         let height: f32 = GRID_HEIGHT as f32;
         0.5 * ((x * 2.0 * PI / width).sin() * (y * 2.0 * PI / height).sin()) + 0.5
     });
+    let mut velocity_array = Array2::from_shape_fn((GRID_WIDTH, GRID_HEIGHT), |(i, j)| {
+        0.01
+    });
+    // Initialize a velocity array
     // Initialize the image for rendering
     let mut image = Image::gen_image_color(GRID_WIDTH as u16, GRID_HEIGHT as u16, BLACK);
     let texture = Texture2D::from_image(&image);
     texture.set_filter(FilterMode::Nearest);
+    
+    // Main game loop
     loop {
+        // Draw pixels to the texture based on value
         for i in 0..GRID_WIDTH {
             for j in 0..GRID_HEIGHT {
-                let p = p_array[(i, j)];
+                let p = value_array[(i, j)];
                 let color = get_color(p);
                 image.set_pixel(i as u32, j as u32, color);
             }
@@ -68,7 +78,22 @@ async fn main() {
         draw_texture(&texture, 0.0, 0.0, WHITE);
 
         // TODO: Show the FPS
-        // draw_text("Hello, Macroquad!", 20.0, 20.0, 30.0, DARKGRAY);
+        let fps = get_fps();
+        let msg = format!("FPS: {}", fps);
+        draw_text(&msg, 10.0, 10.0, 15.0, WHITE);
+
+        // TODO: Calculate the acceleration
+        // TODO: Update the speed based on acceleration (1/2)
+
+        // Update the position based on speed
+        for i in 0..GRID_WIDTH {
+            for j in 0..GRID_HEIGHT {
+                let v = velocity_array[(i, j)];
+                value_array[(i, j)] += v;
+            }
+        }
+
+        // TODO: Update the speed based on acceleration (1/2)
 
         next_frame().await
     }
