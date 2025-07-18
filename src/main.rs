@@ -117,7 +117,7 @@ async fn main() {
         clear_background(BLACK);
         draw_texture(&texture, 0.0, 0.0, WHITE);
 
-        // TODO: Show the FPS
+        // Show the FPS
         let fps = get_fps();
         let msg = format!("FPS: {fps}");
         draw_text(&msg, 10.0, 10.0, 15.0, WHITE);
