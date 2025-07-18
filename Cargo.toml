@@ -1,11 +1,12 @@
 [package]
-name = "rust-wave-2d"
+name = "wave2d"
 version = "0.1.0"
 edition = "2024"
 license = "MIT"
 
 [dependencies]
 macroquad = "0.4.14"
+ndarray = "0.16.1"
 
 [profile.release]
 opt-level = 3
